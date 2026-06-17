@@ -36,23 +36,22 @@ const medal = (r) => (r === 1 ? "🥇" : r === 2 ? "🥈" : r === 3 ? "🥉" : r
 const goalsHe = (g) => `${g} ${g === 1 ? "שער" : "שערים"}`;
 
 // Shared scorer-points badge, identical in the main and bonus tables.
+// Source is conveyed by color (see legend); text stays compact for mobile.
 function ScorerBadge({ row }) {
   if (row.topScorerFromDominos) {
     return (
-      <span className="scorer-badge src-365">
+      <span className="scorer-badge src-365" title="נמשך מ-365, מתווסף אוטומטית">
         {" "}
-        +{num(row.liveScorerPoints)} ({goalsHe(row.liveScorerGoals)}) · נמשך
-        מ-365, מתווסף אוטומטית
+        +{num(row.liveScorerPoints)} · {goalsHe(row.liveScorerGoals)}
       </span>
     );
   }
   if (row.scorerGoalPoints > 0) {
     const g = Math.round(row.scorerGoalPoints / 2);
     return (
-      <span className="scorer-badge src-5h">
+      <span className="scorer-badge src-5h" title="5 חבר'ה, מתווסף אוטומטית (כלול)">
         {" "}
-        +{num(row.scorerGoalPoints)} ({goalsHe(g)}) · 5 חבר'ה, מתווסף אוטומטית
-        (כלול)
+        +{num(row.scorerGoalPoints)} · {goalsHe(g)}
       </span>
     );
   }
@@ -102,11 +101,11 @@ function MainTable({ rows, meta }) {
           <thead>
             <tr>
               <th>#</th>
+              <th className="total">סה"כ</th>
               <th>שחקן</th>
               <th className="src365">365<br /><small>עד צרפת–סנגל</small></th>
               <th className="src5">5 חבר'ה<br /><small>מצרפת–סנגל</small></th>
               <th>התאמה</th>
-              <th>סה"כ</th>
               <th>אלופה</th>
               <th>מלך שערים</th>
             </tr>
@@ -115,6 +114,7 @@ function MainTable({ rows, meta }) {
             {rows.map((r) => (
               <tr key={r.name}>
                 <td className="rank">{medal(r.rank)}</td>
+                <td className="total">{num(r.total)}</td>
                 <td className="name">{r.name}</td>
                 <td className="src365">{num(r.dominosPoints)}</td>
                 <td className="src5" title={`חי ${num(r.sport5Total)} − לפני צרפת–סנגל ${num(r.preFrance)}`}>
@@ -126,7 +126,6 @@ function MainTable({ rows, meta }) {
                     <span className="tip" title={r.adjustReason}>ⓘ</span>
                   )}
                 </td>
-                <td className="total">{num(r.total)}</td>
                 <td className={r.winnerFromDominos ? "src-365" : "src-5h"}>
                   {r.winnerName || "—"}
                   {r.championRatio != null && (

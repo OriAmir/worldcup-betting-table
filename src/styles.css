@@ -126,7 +126,11 @@ tbody tr:hover {
 .total {
   font-weight: 800;
   color: var(--accent);
-  font-size: 16px;
+  font-size: 18px;
+  text-align: center;
+}
+td.total {
+  background: rgba(255, 211, 77, 0.08);
 }
 
 .adj {
@@ -228,4 +232,70 @@ thead small {
   background: rgba(255, 178, 74, 0.12);
   border-color: rgba(255, 178, 74, 0.4);
   color: #ffcf99;
+}
+
+/* ---------- mobile-friendly ---------- */
+.scorer-badge {
+  white-space: normal;
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 14px 8px 48px;
+  }
+  .card {
+    padding: 12px 8px;
+    border-radius: 12px;
+  }
+  table {
+    font-size: 13px;
+    min-width: 0;
+  }
+  th,
+  td {
+    padding: 7px 6px;
+  }
+  /* keep rank + total visible while scrolling the rest horizontally */
+  th:nth-child(1),
+  td:nth-child(1),
+  th:nth-child(2),
+  td.total {
+    position: sticky;
+    background: var(--card);
+    z-index: 1;
+  }
+  th:nth-child(1),
+  td:nth-child(1) {
+    right: 0;
+  }
+  th:nth-child(2),
+  td.total {
+    right: 40px;
+  }
+  .total {
+    font-size: 17px;
+  }
+  .rank {
+    width: 40px;
+    font-size: 16px;
+  }
+  .name {
+    white-space: normal;
+    min-width: 90px;
+  }
+  .scorer-badge {
+    display: block;
+    margin: 4px 0 0;
+    font-size: 11px;
+  }
+  thead small {
+    font-size: 10px;
+  }
+  .hero h1 {
+    font-size: 20px;
+  }
+  .hero .sub {
+    font-size: 13px;
+  }
 }
