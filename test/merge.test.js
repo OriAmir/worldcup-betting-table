@@ -97,3 +97,23 @@ test("rows sorted by total desc with ranks and medals", () => {
     assert.ok(rows[i - 1].total >= rows[i].total);
   }
 });
+
+test("game breakdown sums into the 5 חבר'ה portion", () => {
+  const games = [
+    {
+      label: "צרפת - סנגל",
+      result: "3-1",
+      perMember: { oriamir: { score: 5.5, guess: "3-1" } },
+    },
+    {
+      label: "עיראק - נורווגיה",
+      result: "1-4",
+      perMember: { oriamir: { score: 1.5, guess: "0-2" } },
+    },
+  ];
+  const { rows } = mergeStandings(sport5, topScorers, games);
+  const ori = rows.find((r) => r.name === "oriamir");
+  assert.equal(ori.gameBreakdown.length, 2);
+  assert.equal(ori.gamesPointsSum, 7); // 5.5 + 1.5
+  assert.equal(ori.gameBreakdown[0].label, "צרפת - סנגל");
+});

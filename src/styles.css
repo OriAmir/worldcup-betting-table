@@ -299,3 +299,101 @@ thead small {
     font-size: 13px;
   }
 }
+
+/* ---------- clickable rows + breakdown ---------- */
+.legend.hint {
+  margin-top: -6px;
+  color: var(--accent);
+}
+tr.clickable {
+  cursor: pointer;
+}
+tr.clickable:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+tr.clickable.open {
+  background: rgba(255, 211, 77, 0.08);
+}
+.caret {
+  color: var(--muted);
+  font-size: 12px;
+}
+.detail-row > td {
+  padding: 0;
+  background: #0e1424;
+}
+.breakdown {
+  padding: 14px 16px;
+  border-top: 2px solid var(--accent);
+}
+.bd-title {
+  font-weight: 800;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+.bd-section {
+  margin-bottom: 12px;
+}
+.bd-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  font-weight: 600;
+}
+.bd-line b {
+  font-size: 15px;
+}
+.bd-note {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 4px 10px 0;
+}
+.bd-games {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+  min-width: 0;
+}
+.bd-games td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+  white-space: normal;
+  font-size: 13px;
+}
+.bd-result {
+  color: var(--muted);
+  font-weight: 700;
+  text-align: center;
+}
+.bd-guess {
+  color: var(--muted);
+  font-size: 12px;
+}
+.bd-pts {
+  text-align: left;
+  font-weight: 800;
+  width: 56px;
+}
+.bd-pts.pos {
+  color: #7CFFB2;
+}
+.bd-pts.zero {
+  color: var(--muted);
+}
+.bd-sub td {
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.03);
+}
+.bd-total {
+  margin-top: 6px;
+  background: rgba(255, 211, 77, 0.14);
+  border: 1px solid rgba(255, 211, 77, 0.4);
+}
+.bd-total b {
+  color: var(--accent);
+  font-size: 18px;
+}

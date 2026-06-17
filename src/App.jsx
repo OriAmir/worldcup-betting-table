@@ -93,9 +93,12 @@ export default function App() {
 }
 
 function MainTable({ rows, meta }) {
+  const [openName, setOpenName] = useState(null);
+  const colSpan = 8;
   return (
     <section className="card">
       <h2>טבלה כללית — {meta.groupName}</h2>
+      <p className="legend hint">לחצו על שחקן לפירוט מלא של הניקוד 👆</p>
       <div className="table-wrap">
         <table>
           <thead>
@@ -112,33 +115,50 @@ function MainTable({ rows, meta }) {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.name}>
-                <td className="rank">{medal(r.rank)}</td>
-                <td className="total">{num(r.total)}</td>
-                <td className="name">{r.name}</td>
-                <td className="src365">{num(r.dominosPoints)}</td>
-                <td className="src5" title={`חי ${num(r.sport5Total)} − לפני צרפת–סנגל ${num(r.preFrance)}`}>
-                  {num(r.sport5Points)}
-                </td>
-                <td className={r.adjustPoints ? "adj" : ""}>
-                  {r.adjustPoints ? `+${num(r.adjustPoints)}` : "—"}
-                  {r.adjustReason && (
-                    <span className="tip" title={r.adjustReason}>ⓘ</span>
-                  )}
-                </td>
-                <td className={r.winnerFromDominos ? "src-365" : "src-5h"}>
-                  {r.winnerName || "—"}
-                  {r.championRatio != null && (
-                    <span className="ratio"> ({r.championRatio})</span>
-                  )}
-                  {r.winnerCorrect && " ✅"}
-                </td>
-                <td>
-                  {r.topScorerName || "—"}
-                  <ScorerBadge row={r} />
-                  {r.topScorerCorrect && " ✅"}
-                </td>
-              </tr>
+              <React.Fragment key={r.name}>
+                <tr
+                  className={"clickable" + (openName === r.name ? " open" : "")}
+                  onClick={() =>
+                    setOpenName(openName === r.name ? null : r.name)
+                  }
+                >
+                  <td className="rank">{medal(r.rank)}</td>
+                  <td className="total">{num(r.total)}</td>
+                  <td className="name">
+                    <span className="caret">{openName === r.name ? "▾" : "▸"}</span>{" "}
+                    {r.name}
+                  </td>
+                  <td className="src365">{num(r.dominosPoints)}</td>
+                  <td className="src5" title={`חי ${num(r.sport5Total)} − לפני צרפת–סנגל ${num(r.preFrance)}`}>
+                    {num(r.sport5Points)}
+                  </td>
+                  <td className={r.adjustPoints ? "adj" : ""}>
+                    {r.adjustPoints ? `+${num(r.adjustPoints)}` : "—"}
+                    {r.adjustReason && (
+                      <span className="tip" title={r.adjustReason}>ⓘ</span>
+                    )}
+                  </td>
+                  <td className={r.winnerFromDominos ? "src-365" : "src-5h"}>
+                    {r.winnerName || "—"}
+                    {r.championRatio != null && (
+                      <span className="ratio"> ({r.championRatio})</span>
+                    )}
+                    {r.winnerCorrect && " ✅"}
+                  </td>
+                  <td>
+                    {r.topScorerName || "—"}
+                    <ScorerBadge row={r} />
+                    {r.topScorerCorrect && " ✅"}
+                  </td>
+                </tr>
+                {openName === r.name && (
+                  <tr className="detail-row">
+                    <td colSpan={colSpan}>
+                      <Breakdown row={r} />
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))}
           </tbody>
         </table>
@@ -152,6 +172,92 @@ function MainTable({ rows, meta }) {
         חבר'ה).
       </p>
     </section>
+  );
+}
+
+function Breakdown({ row: r }) {
+  return (
+    <div className="breakdown">
+      <div className="bd-title">פירוט הניקוד של {r.name}</div>
+
+      <div className="bd-section">
+        <div className="bd-line src-365">
+          <span>365 (דומינוס) — עד צרפת–סנגל</span>
+          <b>{num(r.dominosPoints)}</b>
+        </div>
+        <div className="bd-note">בסיס קבוע מהטבלה של דומינוס (ללא פירוט משחקים).</div>
+      </div>
+
+      <div className="bd-section">
+        <div className="bd-line src-5h">
+          <span>5 חבר'ה — מצרפת–סנגל והלאה</span>
+          <b>{num(r.sport5Points)}</b>
+        </div>
+        {r.gameBreakdown && r.gameBreakdown.length > 0 ? (
+          <table className="bd-games">
+            <tbody>
+              {r.gameBreakdown.map((g, i) => (
+                <tr key={i}>
+                  <td>{g.label}</td>
+                  <td className="bd-result">{g.result}</td>
+                  <td className="bd-guess">{g.guess ? `ניחוש ${g.guess}` : "ללא ניחוש"}</td>
+                  <td className={"bd-pts " + (g.score > 0 ? "pos" : "zero")}>
+                    {g.score > 0 ? `+${num(g.score)}` : "0"}
+                  </td>
+                </tr>
+              ))}
+              <tr className="bd-sub">
+                <td colSpan={3}>סה"כ ניחושי משחקים</td>
+                <td className="bd-pts">+{num(r.gamesPointsSum)}</td>
+              </tr>
+              {r.scorerGoalPoints > 0 && (
+                <tr className="bd-sub">
+                  <td colSpan={3}>
+                    מלך שערים ({r.topScorerName}) — {goalsHe(Math.round(r.scorerGoalPoints / 2))}
+                  </td>
+                  <td className="bd-pts">+{num(r.scorerGoalPoints)}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        ) : (
+          <div className="bd-note">אין עדיין נקודות 5 חבר'ה מצרפת–סנגל.</div>
+        )}
+      </div>
+
+      {r.topScorerFromDominos && r.liveScorerPoints > 0 && (
+        <div className="bd-section">
+          <div className="bd-line src-365">
+            <span>מלך שערים מ-365 ({r.topScorerName}) — {goalsHe(r.liveScorerGoals)}</span>
+            <b>+{num(r.liveScorerPoints)}</b>
+          </div>
+          <div className="bd-note">נמשך חי מ-365 כי לא נבחר ב-5 חבר'ה.</div>
+        </div>
+      )}
+
+      {r.adjustPoints > 0 && (
+        <div className="bd-section">
+          <div className="bd-line adj">
+            <span>התאמה ידנית{r.adjustReason ? ` — ${r.adjustReason}` : ""}</span>
+            <b>+{num(r.adjustPoints)}</b>
+          </div>
+        </div>
+      )}
+
+      {r.championBonus > 0 && (
+        <div className="bd-section">
+          <div className="bd-line src-5h">
+            <span>בונוס אלופה ({r.winnerName})</span>
+            <b>+{num(r.championBonus)}</b>
+          </div>
+        </div>
+      )}
+
+      <div className="bd-line bd-total">
+        <span>סה"כ</span>
+        <b>{num(r.total)}</b>
+      </div>
+    </div>
   );
 }
 
