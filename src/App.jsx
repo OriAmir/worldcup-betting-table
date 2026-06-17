@@ -129,14 +129,11 @@ function MainTable({ rows, meta }) {
                     {r.name}
                   </td>
                   <td className="src365">{num(r.dominosPoints)}</td>
-                  <td className="src5" title={`חי ${num(r.sport5Total)} − לפני צרפת–סנגל ${num(r.preFrance)}`}>
+                  <td className="src5">
                     {num(r.sport5Points)}
                   </td>
                   <td className={r.adjustPoints ? "adj" : ""}>
                     {r.adjustPoints ? `+${num(r.adjustPoints)}` : "—"}
-                    {r.adjustReason && (
-                      <span className="tip" title={r.adjustReason}>ⓘ</span>
-                    )}
                   </td>
                   <td className={r.winnerFromDominos ? "src-365" : "src-5h"}>
                     {r.winnerName || "—"}
@@ -241,6 +238,23 @@ function Breakdown({ row: r }) {
             <span>התאמה ידנית{r.adjustReason ? ` — ${r.adjustReason}` : ""}</span>
             <b>+{num(r.adjustPoints)}</b>
           </div>
+          {r.adjustMissing && r.adjustMissing.length > 0 && (
+            <table className="bd-games">
+              <tbody>
+                <tr className="bd-sub">
+                  <td colSpan={2}>משחקים שלא נוחשו (הושלמו ידנית):</td>
+                </tr>
+                {r.adjustMissing.map((g, i) => (
+                  <tr key={i}>
+                    <td>{g.match}</td>
+                    <td className={"bd-pts " + (g.points > 0 ? "pos" : "zero")}>
+                      {g.points > 0 ? `+${num(g.points)}` : "0"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 
