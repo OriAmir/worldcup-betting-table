@@ -167,3 +167,29 @@ tr.needs-add:hover {
   color: var(--muted);
   font-size: 13px;
 }
+
+/* source-column emphasis */
+.src365 {
+  color: #8fd2ff;
+}
+.src5 {
+  color: #ffd9a8;
+}
+th.src365,
+th.src5 {
+  text-align: center;
+}
+td.src365,
+td.src5 {
+  text-align: center;
+  font-weight: 700;
+}
+thead small {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 11px;
+}
+.ratio {
+  color: #b6f0c2;
+  font-size: 13px;
+}

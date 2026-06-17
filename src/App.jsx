@@ -31,9 +31,8 @@ function useStandings() {
   return { data, error, loading, reload: load };
 }
 
-function medal(rank) {
-  return rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : rank;
-}
+const num = (n) => (Number.isInteger(n) ? n : n.toFixed(1));
+const medal = (r) => (r === 1 ? "🥇" : r === 2 ? "🥈" : r === 3 ? "🥉" : r);
 
 export default function App() {
   const { data, error, loading, reload } = useStandings();
@@ -43,9 +42,10 @@ export default function App() {
       <header className="hero">
         <h1>🏆 טבלת הניחושים – מונדיאל 2026</h1>
         <p className="sub">
-          הטבלה הראשית מסונכרנת אוטומטית מ־<b>5 חבר'ה</b>. ניצחון/מלך שערים
-          מסומנים ב־<span className="star">*</span> הושלמו מ־<b>דומינוס 365</b>{" "}
-          ויתווספו בסוף הטורניר.
+          <b>סה"כ = 365 (עד צרפת–סנגל) + 5 חבר'ה (מצרפת–סנגל והלאה) + התאמות.</b>{" "}
+          עמודת <b>365</b> היא צילום קבוע עד משחק צרפת–סנגל; עמודת{" "}
+          <b>5 חבר'ה</b> מתעדכנת אוטומטית בזמן אמת. ניחוש אלופה/מלך שערים שחסר
+          ב־5 חבר'ה מושלם מ־365 ומסומן ב־<span className="star">*</span>.
         </p>
         {data && (
           <div className="updated">
@@ -56,15 +56,13 @@ export default function App() {
       </header>
 
       {loading && !data && <div className="state">טוען נתונים…</div>}
-      {error && (
-        <div className="state error">שגיאה בטעינה: {error}</div>
-      )}
+      {error && <div className="state error">שגיאה בטעינה: {error}</div>}
 
       {data && <MainTable rows={data.rows} meta={data.meta} />}
       {data && <BonusTable rows={data.rows} meta={data.meta} />}
 
       <footer className="foot">
-        מסונכרן בזמן אמת · מקור ראשי: 5 חבר'ה · השלמות: דומינוס 365
+        מסונכרן בזמן אמת · מקור חי: 5 חבר'ה · בסיס קבוע: דומינוס 365 (עד צרפת–סנגל)
       </footer>
     </div>
   );
@@ -80,9 +78,9 @@ function MainTable({ rows, meta }) {
             <tr>
               <th>#</th>
               <th>שחקן</th>
-              <th>ניחושים</th>
+              <th className="src365">365<br /><small>עד צרפת–סנגל</small></th>
+              <th className="src5">5 חבר'ה<br /><small>מצרפת–סנגל</small></th>
               <th>התאמה</th>
-              {meta.bonusActive && <th>בונוס</th>}
               <th>סה"כ</th>
               <th>אלופה</th>
               <th>מלך שערים</th>
@@ -93,34 +91,29 @@ function MainTable({ rows, meta }) {
               <tr key={r.name} className={r.needsManualAdd ? "needs-add" : ""}>
                 <td className="rank">{medal(r.rank)}</td>
                 <td className="name">{r.name}</td>
-                <td>{r.guessPoints}</td>
+                <td className="src365">{num(r.dominosPoints)}</td>
+                <td className="src5">{num(r.sport5Points)}</td>
                 <td className={r.adjustPoints ? "adj" : ""}>
-                  {r.adjustPoints ? `+${r.adjustPoints}` : "—"}
+                  {r.adjustPoints ? `+${num(r.adjustPoints)}` : "—"}
                   {r.adjustReason && (
-                    <span className="tip" title={r.adjustReason}>
-                      ⓘ
-                    </span>
+                    <span className="tip" title={r.adjustReason}>ⓘ</span>
                   )}
                 </td>
-                {meta.bonusActive && (
-                  <td>{r.bonusPoints ? `+${r.bonusPoints}` : "—"}</td>
-                )}
-                <td className="total">{r.total}</td>
+                <td className="total">{num(r.total)}</td>
                 <td>
                   {r.winnerName || "—"}
+                  {r.championRatio != null && (
+                    <span className="ratio"> ({r.championRatio})</span>
+                  )}
                   {r.winnerFromDominos && (
-                    <span className="star" title="הושלם מדומינוס – יתווסף בסוף">
-                      *
-                    </span>
+                    <span className="star" title="הושלם מ-365 – חסר ב-5 חבר'ה">*</span>
                   )}
                   {r.winnerCorrect && " ✅"}
                 </td>
                 <td>
                   {r.topScorerName || "—"}
                   {r.topScorerFromDominos && (
-                    <span className="star" title="הושלם מדומינוס – יתווסף בסוף">
-                      *
-                    </span>
+                    <span className="star" title="הושלם מ-365 – חסר ב-5 חבר'ה">*</span>
                   )}
                   {r.topScorerCorrect && " ✅"}
                 </td>
@@ -130,8 +123,9 @@ function MainTable({ rows, meta }) {
         </table>
       </div>
       <p className="legend">
-        <span className="star">*</span> = הניחוש נלקח מדומינוס 365 (חסר ב־5
-        חבר'ה) ויתווסף לחישוב בסוף הטורניר. שורות מסומנות צריכות השלמה ידנית.
+        <span className="star">*</span> = הניחוש נלקח מ־365 (חסר ב־5 חבר'ה) —
+        שורות מודגשות צריכות השלמה ידנית בסוף הטורניר. המספר בסוגריים ליד האלופה
+        = ניקוד הבונוס (יחס הקבוצה ב־5 חבר'ה) שיתווסף אם תזכה.
       </p>
     </section>
   );
@@ -140,16 +134,17 @@ function MainTable({ rows, meta }) {
 function BonusTable({ rows, meta }) {
   return (
     <section className="card">
-      <h2>ניחושי אלופה ומלך שערים (בונוס סוף טורניר)</h2>
+      <h2>בונוס אלופה ומלך שערים</h2>
       {meta.bonusActive ? (
         <p className="legend">
-          תוצאות רשמיות: אלופה = <b>{meta.correctWinner || "—"}</b> ·
-          מלך שערים = <b>{meta.correctTopScorer || "—"}</b>
+          תוצאות רשמיות: אלופה = <b>{meta.correctWinner || "—"}</b> · מלך שערים ={" "}
+          <b>{meta.correctTopScorer || "—"}</b>
         </p>
       ) : (
         <p className="legend">
-          הבונוס יחושב בסוף הטורניר ({meta.winnerPoints} נק' לאלופה,{" "}
-          {meta.topScorerPoints} נק' למלך שערים).
+          בונוס אלופה = יחס הקבוצה ב־5 חבר'ה (למשל צרפת 30, ברזיל 50, נורווגיה
+          120) ויתווסף לסה"כ כשתיוודע האלופה. נקודות מלך השערים ({meta.scorerPointsPerGoal}{" "}
+          לכל גול) כבר נספרות חי בעמודת 5 חבר'ה.
         </p>
       )}
       <div className="table-wrap">
@@ -158,33 +153,35 @@ function BonusTable({ rows, meta }) {
             <tr>
               <th>שחקן</th>
               <th>אלופה</th>
+              <th>בונוס אלופה</th>
               <th>מלך שערים</th>
-              <th>מקור</th>
-              <th>בונוס צפוי</th>
+              <th>נק' שערים (חי)</th>
+              <th>מקור ניחוש</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => {
-              const src =
-                r.winnerFromDominos || r.topScorerFromDominos
-                  ? "דומינוס *"
-                  : "5 חבר'ה";
-              return (
-                <tr key={r.name} className={r.needsManualAdd ? "needs-add" : ""}>
-                  <td className="name">{r.name}</td>
-                  <td>
-                    {r.winnerName || "—"}
-                    {r.winnerCorrect && " ✅"}
-                  </td>
-                  <td>
-                    {r.topScorerName || "—"}
-                    {r.topScorerCorrect && " ✅"}
-                  </td>
-                  <td>{src}</td>
-                  <td>{r.bonusPoints ? `+${r.bonusPoints}` : "—"}</td>
-                </tr>
-              );
-            })}
+            {rows.map((r) => (
+              <tr key={r.name} className={r.needsManualAdd ? "needs-add" : ""}>
+                <td className="name">{r.name}</td>
+                <td>
+                  {r.winnerName || "—"}
+                  {r.winnerCorrect && " ✅"}
+                </td>
+                <td className="ratio">
+                  {r.championRatio != null ? `+${r.championRatio}` : "—"}
+                </td>
+                <td>
+                  {r.topScorerName || "—"}
+                  {r.topScorerCorrect && " ✅"}
+                </td>
+                <td>{r.scorerGoalPoints ? num(r.scorerGoalPoints) : "—"}</td>
+                <td>
+                  {r.winnerFromDominos || r.topScorerFromDominos
+                    ? "365 *"
+                    : "5 חבר'ה"}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
