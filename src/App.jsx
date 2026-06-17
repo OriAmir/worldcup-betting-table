@@ -33,6 +33,31 @@ function useStandings() {
 
 const num = (n) => (Number.isInteger(n) ? n : n.toFixed(1));
 const medal = (r) => (r === 1 ? "🥇" : r === 2 ? "🥈" : r === 3 ? "🥉" : r);
+const goalsHe = (g) => `${g} ${g === 1 ? "שער" : "שערים"}`;
+
+// Shared scorer-points badge, identical in the main and bonus tables.
+function ScorerBadge({ row }) {
+  if (row.topScorerFromDominos) {
+    return (
+      <span className="scorer-badge src-365">
+        {" "}
+        +{num(row.liveScorerPoints)} ({goalsHe(row.liveScorerGoals)}) · נמשך
+        מ-365, מתווסף אוטומטית
+      </span>
+    );
+  }
+  if (row.scorerGoalPoints > 0) {
+    const g = Math.round(row.scorerGoalPoints / 2);
+    return (
+      <span className="scorer-badge src-5h">
+        {" "}
+        +{num(row.scorerGoalPoints)} ({goalsHe(g)}) · 5 חבר'ה, מתווסף אוטומטית
+        (כלול)
+      </span>
+    );
+  }
+  return null;
+}
 
 export default function App() {
   const { data, error, loading, reload } = useStandings();
@@ -44,8 +69,8 @@ export default function App() {
         <p className="sub">
           <b>סה"כ = 365 (עד צרפת–סנגל) + 5 חבר'ה (מצרפת–סנגל והלאה) + התאמות.</b>{" "}
           עמודת <b>365</b> היא צילום קבוע עד משחק צרפת–סנגל; עמודת{" "}
-          <b>5 חבר'ה</b> מתעדכנת אוטומטית בזמן אמת. ניחוש אלופה/מלך שערים שחסר
-          ב־5 חבר'ה מושלם מ־365 ומסומן ב־<span className="star">*</span>.
+          <b>5 חבר'ה</b> מתעדכנת אוטומטית בזמן אמת. ניחושי אלופה/מלך שערים של מי
+          שלא בחר ב־5 חבר'ה נלקחים מ־365 (פירוט בטבלת הבונוס למטה).
         </p>
         {data && (
           <div className="updated">
@@ -88,11 +113,13 @@ function MainTable({ rows, meta }) {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.name} className={r.needsManualAdd ? "needs-add" : ""}>
+              <tr key={r.name}>
                 <td className="rank">{medal(r.rank)}</td>
                 <td className="name">{r.name}</td>
                 <td className="src365">{num(r.dominosPoints)}</td>
-                <td className="src5">{num(r.sport5Points)}</td>
+                <td className="src5" title={`חי ${num(r.sport5Total)} − לפני צרפת–סנגל ${num(r.preFrance)}`}>
+                  {num(r.sport5Points)}
+                </td>
                 <td className={r.adjustPoints ? "adj" : ""}>
                   {r.adjustPoints ? `+${num(r.adjustPoints)}` : "—"}
                   {r.adjustReason && (
@@ -100,21 +127,16 @@ function MainTable({ rows, meta }) {
                   )}
                 </td>
                 <td className="total">{num(r.total)}</td>
-                <td>
+                <td className={r.winnerFromDominos ? "src-365" : "src-5h"}>
                   {r.winnerName || "—"}
                   {r.championRatio != null && (
                     <span className="ratio"> ({r.championRatio})</span>
-                  )}
-                  {r.winnerFromDominos && (
-                    <span className="star" title="הושלם מ-365 – חסר ב-5 חבר'ה">*</span>
                   )}
                   {r.winnerCorrect && " ✅"}
                 </td>
                 <td>
                   {r.topScorerName || "—"}
-                  {r.topScorerFromDominos && (
-                    <span className="star" title="הושלם מ-365 – חסר ב-5 חבר'ה">*</span>
-                  )}
+                  <ScorerBadge row={r} />
                   {r.topScorerCorrect && " ✅"}
                 </td>
               </tr>
@@ -123,9 +145,12 @@ function MainTable({ rows, meta }) {
         </table>
       </div>
       <p className="legend">
-        <span className="star">*</span> = הניחוש נלקח מ־365 (חסר ב־5 חבר'ה) —
-        שורות מודגשות צריכות השלמה ידנית בסוף הטורניר. המספר בסוגריים ליד האלופה
-        = ניקוד הבונוס (יחס הקבוצה ב־5 חבר'ה) שיתווסף אם תזכה.
+        המספר בסוגריים ליד האלופה = ניקוד הבונוס (יחס הקבוצה ב־5 חבר'ה) שיתווסף
+        אוטומטית לסה"כ כשתיוודע האלופה.
+        <br />
+        <span className="src-5h">● 5 חבר'ה</span> = הניחוש נבחר ב־5 חבר'ה ·{" "}
+        <span className="src-365">● 365</span> = הושלם מ־365 (מי שלא בחר ב־5
+        חבר'ה).
       </p>
     </section>
   );
@@ -144,7 +169,8 @@ function BonusTable({ rows, meta }) {
         <p className="legend">
           בונוס אלופה = יחס הקבוצה ב־5 חבר'ה (למשל צרפת 30, ברזיל 50, נורווגיה
           120) ויתווסף לסה"כ כשתיוודע האלופה. נקודות מלך השערים ({meta.scorerPointsPerGoal}{" "}
-          לכל גול) כבר נספרות חי בעמודת 5 חבר'ה.
+          לכל גול): למי שבחר ב־5 חבר'ה נספרות חי בעמודת 5 חבר'ה; למי שלא בחר ב־5
+          חבר'ה — נמשכות חי מ־365 ומופיעות בעמודת "שערים חי (365)".
         </p>
       )}
       <div className="table-wrap">
@@ -155,30 +181,38 @@ function BonusTable({ rows, meta }) {
               <th>אלופה</th>
               <th>בונוס אלופה</th>
               <th>מלך שערים</th>
-              <th>נק' שערים (חי)</th>
-              <th>מקור ניחוש</th>
+              <th>נק' שערים</th>
+              <th>מקור שערים</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.name} className={r.needsManualAdd ? "needs-add" : ""}>
                 <td className="name">{r.name}</td>
-                <td>
+                <td className={r.winnerFromDominos ? "src-365" : "src-5h"}>
                   {r.winnerName || "—"}
                   {r.winnerCorrect && " ✅"}
                 </td>
                 <td className="ratio">
                   {r.championRatio != null ? `+${r.championRatio}` : "—"}
                 </td>
-                <td>
+                <td className={r.topScorerFromDominos ? "src-365" : "src-5h"}>
                   {r.topScorerName || "—"}
                   {r.topScorerCorrect && " ✅"}
                 </td>
-                <td>{r.scorerGoalPoints ? num(r.scorerGoalPoints) : "—"}</td>
+                <td className="ratio">
+                  {r.topScorerFromDominos
+                    ? `${goalsHe(r.liveScorerGoals)} = +${num(
+                        r.liveScorerPoints
+                      )}`
+                    : `${goalsHe(Math.round(r.scorerGoalPoints / 2))} = +${num(
+                        r.scorerGoalPoints
+                      )}`}
+                </td>
                 <td>
-                  {r.winnerFromDominos || r.topScorerFromDominos
-                    ? "365 *"
-                    : "5 חבר'ה"}
+                  {r.topScorerFromDominos
+                    ? "365 (מתווסף אוטומטית)"
+                    : "5 חבר'ה (מתווסף אוטומטית, כלול)"}
                 </td>
               </tr>
             ))}

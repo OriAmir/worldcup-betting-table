@@ -30,16 +30,40 @@ const sport5 = {
   ],
 };
 
-test("total = 365 snapshot + Sport5 + manual adjustment", () => {
+const topScorers = {
+  "קיליאן אמבפה": 2,
+  "ויניסיוס ג׳וניור": 1,
+  "קאי האברץ": 2,
+};
+
+test("borrowed scorer gets live 365 goal points (2/goal)", () => {
+  const { rows } = mergeStandings(sport5, topScorers);
+  const nir = rows.find((r) => r.name === "Nir nechemia");
+  // Nir's scorer borrowed from 365 = קיליאן אמבפה, 2 goals * 2 = 4 live points
+  assert.equal(nir.topScorerFromDominos, true);
+  assert.equal(nir.liveScorerGoals, 2);
+  assert.equal(nir.liveScorerPoints, 4);
+  // total = 365(10) + sport5(4.5) + adjust(5.5) + liveScorer(4)
+  assert.equal(nir.total, 10 + 4.5 + 5.5 + 4);
+});
+
+test("player who picked scorer on Sport5 gets no extra live points", () => {
+  const { rows } = mergeStandings(sport5, topScorers);
+  const ori = rows.find((r) => r.name === "oriamir");
+  assert.equal(ori.topScorerFromDominos, false);
+  assert.equal(ori.liveScorerPoints, 0);
+});
+
+test("total = 365 snapshot + Sport5(France-onwards) + manual adjustment", () => {
   const { rows } = mergeStandings(sport5);
   const ori = rows.find((r) => r.name === "oriamir");
-  // 365 snapshot for oriamir = 8, sport5 = 39.5, no adjustment
+  // 365 snapshot = 8; sport5 live 39.5 - preFrance 21.5 = 18; no adjustment
   assert.equal(ori.dominosPoints, 8);
-  assert.equal(ori.sport5Points, 39.5);
-  assert.equal(ori.total, 8 + 39.5);
+  assert.equal(ori.sport5Points, 18);
+  assert.equal(ori.total, 8 + 18);
 
   const nir = rows.find((r) => r.name === "Nir nechemia");
-  // 365 snapshot = 10, sport5 = 4.5, manual +5.5
+  // 365 = 10; sport5 4.5 - preFrance 0 = 4.5; manual +5.5
   assert.equal(nir.dominosPoints, 10);
   assert.equal(nir.sport5Points, 4.5);
   assert.equal(nir.adjustPoints, 5.5);

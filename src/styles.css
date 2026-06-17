@@ -193,3 +193,39 @@ thead small {
   color: #b6f0c2;
   font-size: 13px;
 }
+
+/* scorer points already included in the 5 חבר'ה column (informational) */
+.ratio.incl {
+  color: #9aa6c0;
+}
+
+/* unified scorer badge – same design everywhere */
+.scorer-badge {
+  display: inline-block;
+  margin-inline-start: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(124, 255, 178, 0.12);
+  border: 1px solid rgba(124, 255, 178, 0.35);
+  color: #b6f0c2;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* source color coding: 5 חבר'ה vs 365 */
+.src-5h {
+  color: #7CFFB2;
+}
+.src-365 {
+  color: #ffb24a;
+}
+.scorer-badge.src-5h {
+  background: rgba(124, 255, 178, 0.12);
+  border-color: rgba(124, 255, 178, 0.35);
+  color: #b6f0c2;
+}
+.scorer-badge.src-365 {
+  background: rgba(255, 178, 74, 0.12);
+  border-color: rgba(255, 178, 74, 0.4);
+  color: #ffcf99;
+}
